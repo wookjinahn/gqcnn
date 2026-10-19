@@ -40,7 +40,7 @@ The earlier comparison covers GraspNet/SuctionNet `test_seen`, RealSense, scenes
 At startup master was aligned with origin/master at 499a609; after the first push both committed refs matched at e9c75c9 with 0/0 divergence. Host Ubuntu 22.04.5 and Conda 26.3.2; Python 3.13 is incompatible with this legacy code. The working environment has TensorFlow 1.15.0, NumPy 1.19.5, autolab-core 1.1.1, autolab-perception 1.0.0, visualization 1.0.0, pyglet 1.5.31, and ruamel.yaml 0.17.40; see `envs/dexnet3.yml`. GQ-CNN 3.0 was trained for Primesense Carmine, while the tested SuctionNet frame uses RealSense; Q is not benchmark accuracy. Local SuctionNet data includes test_seen scenes 0100–0129 under `/home/wj/Desktop/Codes/graspnet_dataset`. The dataset's depth factor is 1000 for the tested frame; metadata supplies intrinsics. SuctionNet's evaluation array uses `[score, outward_direction(3), camera_point_m(3)]`; the GQ-CNN approach axis is negated. Model ZIP SHA256: `d048afb9974d4c3170ccb89289302ea871b795d421ee3910805675f35da7b1f6`.
 
 ## Modified files
-This work adds `tools/dexnet3_suctionnet_infer.py`, `tools/eval_suctionnet_with_axial_fix.py`, `tools/reevaluate_axial_baselines.py`, `tools/eval_dexnet3_suctionnet_incremental.py`, and `docs/dexnet3_suctionnet_benchmark.md`; it edits `docs/dexnet3_suctionnet.md`, `.ai/DECISIONS.md`, and this handoff. These source changes are ready to stage; large outputs remain ignored under `.ai/local/`.
+Commit `b7ce385` adds `tools/dexnet3_suctionnet_infer.py`, `tools/eval_suctionnet_with_axial_fix.py`, `tools/reevaluate_axial_baselines.py`, `tools/eval_dexnet3_suctionnet_incremental.py`, and `docs/dexnet3_suctionnet_benchmark.md`; it edits `docs/dexnet3_suctionnet.md`, `.ai/DECISIONS.md`, and this handoff. Large outputs remain ignored under `.ai/local/`.
 
 Commit `56651dc` contains `.gitignore`, AGENTS.md, CLAUDE.md, README.md, `examples/policy.py`, `.dev/setup.sh`, `envs/dexnet3.yml`, `tools/prepare_suctionnet_frame.py`, `docs/dexnet3_suctionnet.md`, and `.ai/DECISIONS.md`. The first handoff commit e9c75c9 was pushed; this final publication checkpoint updates the same file. Ignored `.ai/local/` assets were not staged.
 
@@ -65,19 +65,19 @@ Read-only verification for the comparison lookup: inspected the Seg2Grasp benchm
 `bash .dev/setup.sh` passed with the populated environment/model. `MPLBACKEND=Agg MPLCONFIGDIR=$PWD/.ai/local/mpl PYTHONPATH=$PWD .ai/local/dexnet3/bin/python examples/policy.py GQCNN-3.0 --model_dir .ai/local/models --depth_image data/examples/single_object/primesense/depth_0.npy --segmask data/examples/single_object/primesense/segmask_0.png --config_filename cfg/examples/replication/dex-net_3.0.yaml --result_dir .ai/local/results/example_0` passed. `.ai/local/dexnet3/bin/python tools/prepare_suctionnet_frame.py /home/wj/Desktop/Codes/graspnet_dataset --scene 100 --camera realsense --frame 0 --output_dir .ai/local/suctionnet/scene_0100/realsense/0000` passed and found 203,495 valid object pixels. The same policy with this converted frame, its `camera.intr`, and result directory `.ai/local/results/suctionnet_scene_0100_realsense_0000_verified` passed. Saved NPZ shape (1, 7), outward direction (0, 0, -1), and mask at selected pixel 255 were checked. `git diff --check`, `bash -n .dev/setup.sh`, Python compilation of changed scripts, and `pip check` passed. No broad test suite or official SuctionNet AP evaluation was run.
 
 ## Remaining work
-Commit and push the exporter, evaluator wrappers, benchmark guide, and handoff/decision updates. The benchmark itself is complete; `test_similar`/`test_novel` remain out of scope for this run. A fresh environment build from `envs/dexnet3.yml` has not been independently repeated.
+The benchmark itself is complete and published. `test_similar`/`test_novel` remain out of scope for this run. A fresh environment build from `envs/dexnet3.yml` has not been independently repeated.
 
 ## Next steps
-Stage explicit changed paths, commit, push to `origin/master`, then verify the tracking refs and clean worktree.
+If extending the study, evaluate `test_similar`/`test_novel` and consider a Dex-Net model trained for RealSense; otherwise no required work remains.
 
 ## Current branch
 master (tracking origin/master; 0/0 divergence verified after the first push, before this final checkpoint commit)
 
 ## Last relevant commit
-97ed10e Record published Dex-Net 3.0 checkpoint (substantive code/doc commit: 56651dc)
+b7ce385 Add Dex-Net 3.0 SuctionNet benchmark
 
 ## Last agent
 codex
 
 ## Timestamp
-2026-10-19 06:50:46 UTC
+2026-10-19 06:53:02 UTC
