@@ -93,3 +93,6 @@ statistics, so the displayed Q value is a model output, not measured grasp
 success or benchmark accuracy. The official SuctionNet evaluation requires
 predictions for every frame in a test split; see the
 [SuctionNet API](https://github.com/graspnet/suctionnetAPI).
+
+For the same AP evaluation used by the prior Seg2Grasp/SuctionNet comparison,
+see [the Dex-Net benchmark guide](dexnet3_suctionnet_benchmark.md).
