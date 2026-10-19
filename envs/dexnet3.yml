@@ -1,0 +1,24 @@
+name: dexnet3
+channels:
+  - defaults
+dependencies:
+  - python=3.7.16
+  - pip=22.3.1
+  - pip:
+      - tensorflow==1.15.0
+      - numpy==1.19.5
+      - protobuf==3.20.3
+      - h5py==2.10.0
+      - autolab-core==1.1.1
+      - autolab-perception==1.0.0
+      - visualization==1.0.0
+      - opencv-python==5.0.0.93
+      - scipy==1.7.3
+      - matplotlib==3.5.3
+      - scikit-learn==1.0.2
+      - scikit-image==0.19.3
+      - gputil==1.4.0
+      - psutil==7.2.2
+      - pyglet==1.5.31
+      - ruamel.yaml==0.17.40
+      - gdown==4.7.3

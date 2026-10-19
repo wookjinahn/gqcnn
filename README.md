@@ -22,6 +22,8 @@ The gqcnn Python package is for training and analysis of Grasp Quality Convoluti
 ## Installation and Usage
 Please see the [docs](https://berkeleyautomation.github.io/gqcnn/) for installation and usage instructions.
 
+For the verified Ubuntu 22.04 Conda setup, Dex-Net 3.0 example, and a SuctionNet
+frame conversion, see [Dex-Net 3.0 and SuctionNet](docs/dexnet3_suctionnet.md).
+
 ## Citation
 If you use any part of this code in a publication, please cite [the appropriate Dex-Net publication](https://berkeleyautomation.github.io/gqcnn/index.html#academic-use).
-

@@ -45,7 +45,8 @@ from visualization import Visualizer2D as vis
 from gqcnn.grasping import (RobustGraspingPolicy,
                             CrossEntropyRobustGraspingPolicy, RgbdImageState,
                             FullyConvolutionalGraspingPolicyParallelJaw,
-                            FullyConvolutionalGraspingPolicySuction)
+                            FullyConvolutionalGraspingPolicySuction,
+                            SuctionPoint2D)
 from gqcnn.utils import GripperMode
 
 # Set up logger.
@@ -80,6 +81,10 @@ if __name__ == "__main__":
                         type=str,
                         default=None,
                         help="path to configuration file to use")
+    parser.add_argument("--result_dir",
+                        type=str,
+                        default=None,
+                        help="save grasp result and visualization in this folder")
     parser.add_argument(
         "--fully_conv",
         action="store_true",
@@ -93,6 +98,14 @@ if __name__ == "__main__":
     model_dir = args.model_dir
     config_filename = args.config_filename
     fully_conv = args.fully_conv
+    result_dir = args.result_dir
+
+    if result_dir is not None:
+        os.makedirs(result_dir, exist_ok=True)
+        result_filenames = ("grasp.json", "grasp.png", "suction.npz")
+        if any(os.path.exists(os.path.join(result_dir, name))
+               for name in result_filenames):
+            parser.error("Result files already exist in {}".format(result_dir))
 
     assert not (fully_conv and depth_im_filename is not None
                 and segmask_filename is None
@@ -255,8 +268,38 @@ if __name__ == "__main__":
     action = policy(state)
     logger.info("Planning took %.3f sec" % (time.time() - policy_start))
 
+    grasp = action.grasp
+    if isinstance(grasp, SuctionPoint2D):
+        logger.info("Suction center (x, y): %s, depth: %.4f m, Q: %.4f",
+                    grasp.center.data, grasp.depth, action.q_value)
+    if result_dir is not None:
+        result = {
+            "model": model_name,
+            "q_value": float(action.q_value),
+            "center_px": grasp.center.data.tolist(),
+            "depth_m": float(grasp.depth),
+            "camera_frame": camera_intr.frame,
+        }
+        if isinstance(grasp, SuctionPoint2D):
+            point_camera = grasp.pose().translation
+            result.update({
+                "point_camera_m": point_camera.tolist(),
+                "axis_camera": grasp.axis.tolist(),
+                "suctionnet_direction_camera": (-grasp.axis).tolist(),
+            })
+            # SuctionNet uses the outward normal, opposite this policy's
+            # camera-to-surface approach axis: [score, direction(3), point(3)].
+            prediction = np.r_[action.q_value, -grasp.axis, point_camera]
+            np.savez_compressed(os.path.join(result_dir, "suction.npz"),
+                                prediction.reshape(1, 7))
+        else:
+            result["angle_rad"] = float(grasp.angle)
+        with open(os.path.join(result_dir, "grasp.json"), "w") as stream:
+            json.dump(result, stream, indent=2)
+            stream.write("\n")
+
     # Vis final grasp.
-    if policy_config["vis"]["final_grasp"]:
+    if policy_config["vis"]["final_grasp"] or result_dir is not None:
         vis.figure(size=(10, 10))
         vis.imshow(rgbd_im.depth,
                    vmin=policy_config["vis"]["vmin"],
@@ -264,4 +307,6 @@ if __name__ == "__main__":
         vis.grasp(action.grasp, scale=2.5, show_center=False, show_axis=True)
         vis.title("Planned grasp at depth {0:.3f}m with Q={1:.3f}".format(
             action.grasp.depth, action.q_value))
+        if result_dir is not None:
+            vis.savefig(os.path.join(result_dir, "grasp.png"))
         vis.show()
